@@ -14,6 +14,8 @@ data:
   DB_HOST: "mysql.mydb.svc.cluster.local"
   DB_PORT: "3306"
   DB_NAME: "test"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-svc.observability.svc.cluster.local:4317"
+  OTEL_EXPORTER_OTLP_INSECURE: "true"
 
 ---
 apiVersion: v1
@@ -51,7 +53,7 @@ spec:
           requests:
             cpu: 100m
             memory: 128M
-        image: localhost/tesseract/myapp-go:1.0.0-ad09a35
+        image: localhost/tesseract/myapp-go:v1.0.1-9af4cdb
         imagePullPolicy: Never
         ports:
         - containerPort: 8003
@@ -81,6 +83,16 @@ spec:
             secretKeyRef:
               name: app-secret
               key: DB_PASSWORD
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
+        - name: OTEL_EXPORTER_OTLP_INSECURE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: OTEL_EXPORTER_OTLP_INSECURE
 
 ---
 apiVersion: v1

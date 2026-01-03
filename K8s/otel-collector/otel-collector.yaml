@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-config
+  namespace: observability
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+
+    exporters:
+      otlp/jaeger:
+        endpoint: jaeger.observability.svc.cluster.local:4317
+        tls:
+          insecure: true
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          exporters: [otlp/jaeger]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app: otel-collector
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector:latest
+          args:
+            - --config=/etc/otel/config.yaml
+          ports:
+            - containerPort: 4317
+              name: otlp-grpc
+              protocol: TCP
+          volumeMounts:
+            - name: otel-config
+              mountPath: /etc/otel/config.yaml
+              subPath: config.yaml
+              readOnly: true
+      volumes:
+        - name: otel-config
+          configMap:
+            name: otel-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector-svc
+  namespace: observability
+  labels:
+    app: otel-collector
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector
+  ports:
+    - port: 4317
+      targetPort: 4317
+      name: otlp-grpc
+      protocol: TCP
