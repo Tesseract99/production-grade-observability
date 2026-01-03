@@ -1,0 +1,98 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: myapp-go
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: myapp-go
+data:
+  DB_HOST: "mysql.mydb.svc.cluster.local"
+  DB_PORT: "3306"
+  DB_NAME: "test"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+  namespace: myapp-go
+type: Opaque
+stringData:
+  DB_USERNAME: "root"
+  DB_PASSWORD: "tesseract@2025"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: myapp-go
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp-go
+  template:
+    metadata:
+      labels:
+        app: myapp-go
+    spec:
+      containers:
+      - name: myapp-go
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128M
+        image: localhost/tesseract/myapp-go:1.0.0-ad09a35
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8003
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_NAME
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_USERNAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: DB_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+  namespace: myapp-go
+spec:
+  selector:
+    app: myapp-go
+  ports:
+  - protocol: TCP
+    port: 8003
+    targetPort: 8003
+  type: ClusterIP
