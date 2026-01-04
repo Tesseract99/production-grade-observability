@@ -125,6 +125,7 @@ func main() {
 		log.Println("No .env file found, relying on system environment variables")
 	}
 
+	fmt.Printf("Connecting to OTEL_EXPORTER_OTLP_ENDPOINT: %s \n", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
 	// otel
 	shutdown := initTracer()

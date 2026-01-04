@@ -14,19 +14,8 @@ data:
   DB_HOST: "mysql.mydb.svc.cluster.local"
   DB_PORT: "3306"
   DB_NAME: "test"
-  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector-svc.observability.svc.cluster.local:4317"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector-svc.observability.svc.cluster.local:4317"
   OTEL_EXPORTER_OTLP_INSECURE: "true"
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: app-secret
-  namespace: myapp-go
-type: Opaque
-stringData:
-  DB_USERNAME: "root"
-  DB_PASSWORD: "tesseract@2025"
 
 ---
 apiVersion: apps/v1
@@ -53,7 +42,7 @@ spec:
           requests:
             cpu: 100m
             memory: 128M
-        image: localhost/tesseract/myapp-go:v1.0.1-9af4cdb
+        image: localhost/tesseract/myapp-go:v1.0.1-5a24eb4
         imagePullPolicy: Never
         ports:
         - containerPort: 8003

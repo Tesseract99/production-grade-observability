@@ -1,1 +1,6 @@
 */.env
+*/myapp-go-*.tar
+
+# Kustomize secrets (use *.env.example as template)
+k8s/secrets/*.env
+!k8s/secrets/*.env.example

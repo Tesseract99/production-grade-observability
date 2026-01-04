@@ -7,7 +7,7 @@ kind: Namespace
 metadata:
   name: observability
 ---
-# Jaeger Deployment
+# Jaeger Deployment with Elasticsearch backend
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,6 +36,17 @@ spec:
           env:
             - name: COLLECTOR_OTLP_ENABLED
               value: "true"
+            - name: SPAN_STORAGE_TYPE
+              value: "elasticsearch"
+            - name: ES_SERVER_URLS
+              value: "http://elasticsearch.observability.svc.cluster.local:9200"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
 ---
 # Jaeger Service
 apiVersion: v1
