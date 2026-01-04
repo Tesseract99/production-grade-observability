@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: production-grade-observability
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Tesseract99/production-grade-observability.git
+    targetRevision: HEAD
+    path: app-db/k8s
+    kustomize:
+      # Use the ArgoCD-specific kustomization without local secret files
+      # Rename kustomization-argocd.yaml to kustomization.yaml after setting up sealed secrets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
