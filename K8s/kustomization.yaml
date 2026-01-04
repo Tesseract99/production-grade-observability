@@ -8,15 +8,5 @@ resources:
   - jaegar/jaegar.yaml
   - otel-collector/otel-collector.yaml
 
-secretGenerator:
-  - name: mysql-secret
-    namespace: mydb
-    envs:
-      - secrets/mysql.env
-  - name: app-secret
-    namespace: myapp-go
-    envs:
-      - secrets/app.env
-
 generatorOptions:
   disableNameSuffixHash: true
